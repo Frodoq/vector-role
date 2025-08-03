@@ -1,0 +1,33 @@
+---
+- name: Download Vector
+  get_url:
+    url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-x86_64-unknown-linux-gnu.tar.gz"
+    dest: "{{ vector_dir }}/vector-{{ vector_version }}.tar.gz"
+
+- name: Unpack Vector
+  unarchive:
+    src: "{{ vector_dir }}/vector-{{ vector_version }}.tar.gz"
+    dest: "{{ vector_dir }}"
+    remote_src: yes
+    extra_opts: "--strip-components=2"
+
+- name: Create Vector config dir
+  file:
+    path: /etc/vector
+    state: directory
+
+- name: Setup Vector config
+  template:
+    src: vector.toml.j2
+    dest: /etc/vector/vector.toml
+
+- name: Create systemd service
+  template:
+    src: vector.service.j2
+    dest: /etc/systemd/system/vector.service
+
+- name: Enable Vector service
+  systemd:
+    name: vector
+    enabled: yes
+    state: restarted

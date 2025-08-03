@@ -1,0 +1,8 @@
+[sources.nginx]
+type = "file"
+include = ["/var/log/nginx/*.log"]
+
+[sinks.out]
+type = "console"
+inputs = ["nginx"]
+encoding.codec = "json"
