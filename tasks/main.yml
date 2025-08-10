@@ -1,33 +1,41 @@
 ---
-- name: Download Vector
-  get_url:
-    url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-x86_64-unknown-linux-gnu.tar.gz"
-    dest: "{{ vector_dir }}/vector-{{ vector_version }}.tar.gz"
+- name: Install dependencies
+  apt:
+    name:
+      - curl
+      - gnupg
+      - apt-transport-https
+    state: present
+    update_cache: yes
 
-- name: Unpack Vector
-  unarchive:
-    src: "{{ vector_dir }}/vector-{{ vector_version }}.tar.gz"
-    dest: "{{ vector_dir }}"
-    remote_src: yes
-    extra_opts: "--strip-components=2"
+- name: Add Vector repository key
+  apt_key:
+    url: https://packages.timber.io/vector/gpg.asc
+    state: present
 
-- name: Create Vector config dir
-  file:
-    path: /etc/vector
-    state: directory
+- name: Add Vector repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://packages.timber.io/vector/{{ vector_version }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} main"
+    state: present
+    filename: vector
 
-- name: Setup Vector config
+- name: Install Vector
+  apt:
+    name: vector
+    state: present
+    update_cache: yes
+
+- name: Configure Vector
   template:
-    src: vector.toml.j2
-    dest: /etc/vector/vector.toml
+    src: vector.yml.j2
+    dest: /etc/vector/vector.yml
+    owner: root
+    group: root
+    mode: '0644'
 
-- name: Create systemd service
-  template:
-    src: vector.service.j2
-    dest: /etc/systemd/system/vector.service
-
-- name: Enable Vector service
+- name: Ensure Vector service is enabled and started
   systemd:
     name: vector
+    state: started
     enabled: yes
-    state: restarted
+    daemon_reload: yes

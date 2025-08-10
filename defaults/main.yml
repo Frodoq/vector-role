@@ -1,2 +1,7 @@
+---
 vector_version: "0.34.0"
-vector_dir: "/opt/vector"
+vector_user: "vector"
+vector_config_dir: "/etc/vector"
+clickhouse_host: "{{ groups['clickhouse'][0] }}"
+clickhouse_db: "default"
+clickhouse_table: "logs"

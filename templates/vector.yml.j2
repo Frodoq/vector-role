@@ -1,0 +1,12 @@
+sources:
+  journald:
+    type: journald
+
+sinks:
+  to_clickhouse:
+    type: clickhouse
+    inputs: [journald]
+    endpoint: "http://{{ clickhouse_host }}:8123/"
+    database: "{{ clickhouse_db }}"
+    table: "{{ clickhouse_table }}"
+    skip_unknown_fields: true
